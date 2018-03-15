@@ -30,7 +30,17 @@ h2 {
     color: #263238;
 }
 
+a {
+    color: #fff;
+}
 
+a:hover {
+    color: #e0e0e0;
+}
+
+a:visited {
+    color: #fff;
+}
 
 #header {
     background-image: url('../images/headerimg.jpg');
