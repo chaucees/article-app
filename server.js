@@ -6,14 +6,13 @@ const bodyParser = require('body-parser');
 const cheerio = require('cheerio');
 const request = require('request');
 
-// If deployed, use the deployed database. Otherwise use the local mongoHeadlines database
-var url = 'mongodb://localhost:3000';
-var PORT = 3000;
+// Local port
+var PORT = process.env.PORT || 3000;
 
 // Initialize Express
 var app = express();
 
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static("public"));
 
@@ -21,22 +20,10 @@ app.use(express.static("public"));
 var databaseUrl = "mongoHeadlines";
 var collections = ["articles"];
 
-// // Scrape Request ---------------------
-// request('https://www.nytimes.com/', function (error, response, html) {
-//     // Load the HTML into cheerio and save it to a variable
-//     // '$' becomes a shorthand for cheerio's selector commands, much like jQuery's '$'
-//     var $ = cheerio.load(html);
-//     var results = [];
-//     $('h1.AssetHeadline-headline').each(function (i, element) {
-//         var title = $(element).text();
-//         var link = $(element).children().attr('href');
-//         results.push({
-//             title: title,
-//             link: link
-//         });
-//     });
-//     console.log(results);
-// });
+//Require handlebars
+var exphbs = require("express-handlebars");
+app.engine("handlebars", exphbs({ defaultLayout: "main" }));
+app.set("view engine", "handlebars");
 
 
 // ROUTES --------------------------------
