@@ -5,73 +5,59 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cheerio = require('cheerio');
 const request = require('request');
+const logger = require('morgan');
+
+
+// Require all models and routes
+// var db = require("./models");
+// var routes = require('./routes')(app);
 
 // Local port
-var PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 
 // Initialize Express
-var app = express();
+const app = express();
 
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
 app.use(express.static("public"));
+app.use(logger("dev"));
+
+//Require handlebars
+const exphbs = require("express-handlebars");
+app.engine("handlebars", exphbs({
+    defaultLayout: "main"
+}));
+app.set("view engine", "handlebars");
 
 // Mongojs configuration
 var databaseUrl = "mongoHeadlines";
 var collections = ["articles"];
 
-//Require handlebars
-var exphbs = require("express-handlebars");
-app.engine("handlebars", exphbs({ defaultLayout: "main" }));
-app.set("view engine", "handlebars");
+//Setup for deploying to heroku with mongoDB
+var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
 
-
-// ROUTES --------------------------------
-
-// Home page route
-app.get('/', function(req, res) {
-    res.sendFile(path.join(__dirname + 'public/index.html'));
+mongoose.Promise = Promise;
+mongoose.connect(MONGODB_URI, {
+    //   useMongoClient: true
 });
 
-// Route for getting all Articles from the db
-app.get("/articles", function(req, res) {
-    // Grab every document in the Articles collection
-    db.mongoHeadlines.find({})
-      .then(function(dbArticle) {
-        // If we were able to successfully find Articles, send them back to the client
-        res.json(dbArticle);
-      })
-      .catch(function(err) {
-        // If an error occurred, send it to the client
-        res.json(err);
-      });
+// Retrieve data from the db
+app.get("/all", function(req, res) {
+    // Find all results from the scrapedData collection in the db
+    db.scrapedData.find({}, function(error, found) {
+      // Throw any errors to the console
+      if (error) {
+        console.log(error);
+      }
+      // If there are no errors, send the data to the browser as json
+      else {
+        res.json(found);
+      }
+    });
   });
-
-
-
-// CLICK EVENTS --------------------------------------
-// // Click event to add an article to the db
-// $("save-article").on("click", function () {
-//     $.ajax({
-//             type: "POST",
-//             url: "/submit",
-//             dataType: "json",
-//             data: {
-//                 title: $("#title").val(),
-//                 author: $("#author").val(),
-//                 created: Date.now()
-//             }
-//         })
-//         .then(function (data) {
-//             console.log(data);
-//             getUnread();
-//             $("#author").val("");
-//             $("#title").val("");
-//         });
-//     return false;
-// });
-
-
+  
 
 // Listen on port 3000
 app.listen(3000, function () {
